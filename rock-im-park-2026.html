@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rock im Park 2026 — Planer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f5f2;
+    --bg3: #ededea;
+    --text: #1a1a1a;
+    --text2: #6b6b68;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.25);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --bg2: #252525;
+      --bg3: #2e2e2e;
+      --text: #f0f0ee;
+      --text2: #9a9a97;
+      --border: rgba(255,255,255,0.12);
+      --border2: rgba(255,255,255,0.25);
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg2);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 1.5rem 1rem;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 span {
+    font-weight: 400;
+    color: var(--text2);
+    font-size: 16px;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .day-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .tab {
+    padding: 6px 14px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text2);
+    transition: all .15s;
+    font-family: inherit;
+  }
+
+  .tab:hover { background: var(--bg2); color: var(--text); }
+  .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  .stage-filter {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .sf {
+    padding: 4px 10px;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 12px;
+    background: var(--bg);
+    color: var(--text2);
+    font-family: inherit;
+    transition: all .15s;
+  }
+
+  .sf:hover { background: var(--bg2); color: var(--text); }
+  .sf.active { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .leg {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .info {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .band-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .band-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    cursor: grab;
+    user-select: none;
+    transition: border-color .15s, background .15s, transform .1s;
+  }
+
+  .band-card:hover { background: var(--bg2); }
+  .band-card:active { cursor: grabbing; }
+  .band-card.dragging { opacity: 0.45; transform: scale(0.98); }
+  .band-card.drag-over { border-color: var(--border2); background: var(--bg3); }
+
+  .band-card.state-conflict { border-color: #E24B4A !important; }
+  .band-card.state-partial  { border-color: #EF9F27 !important; }
+
+  .drag-handle {
+    color: var(--text2);
+    font-size: 18px;
+    padding-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .rank-num {
+    font-size: 13px;
+    color: var(--text2);
+    min-width: 28px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .band-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .band-name {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .band-meta {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  .conflict-note {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .conflict-note.red  { color: #A32D2D; }
+  .conflict-note.amber { color: #854F0B; }
+
+  @media (prefers-color-scheme: dark) {
+    .conflict-note.red  { color: #F09595; }
+    .conflict-note.amber { color: #FAC775; }
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: var(--radius-md);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .badge.ok      { background: #EAF3DE; color: #3B6D11; }
+  .badge.partial { background: #FAEEDA; color: #854F0B; }
+  .badge.conflict { background: #FCEBEB; color: #A32D2D; }
+
+  @media (prefers-color-scheme: dark) {
+    .badge.ok       { background: #173404; color: #C0DD97; }
+    .badge.partial  { background: #412402; color: #FAC775; }
+    .badge.conflict { background: #501313; color: #F7C1C1; }
+  }
+
+  .empty {
+    text-align: center;
+    color: var(--text2);
+    font-size: 14px;
+    padding: 2rem 0;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 2rem;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Rock im Park 2026 — Planer<span>Nürnberg, 05.–07. Juni 2026</span></h1>
+
+  <div class="card">
+    <div class="day-tabs" id="dayTabs"></div>
+    <div class="stage-filter" id="stageFilter"></div>
+    <div class="legend">
+      <div class="leg"><div class="dot" style="background:#E24B4A"></div>Vollständige Überschneidung (±5 Min)</div>
+      <div class="leg"><div class="dot" style="background:#EF9F27"></div>Teilweise Überschneidung</div>
+      <div class="leg"><div class="dot" style="background:#639922"></div>Kein Konflikt</div>
+    </div>
+    <div class="info"><i class="ti ti-arrows-up-down" style="font-size:14px"></i> Reihenfolge per Drag &amp; Drop ändern — höher = wichtiger</div>
+    <div class="band-list" id="bandList"></div>
+  </div>
+
+  <footer>Daten: openairguide.net · Timetable Stand Dezember 2025</footer>
+</div>
+
+<script>
+const RAW = {
+  "Fr, 05.06.":[
+    {name:"Ecca Vandal",stage:"Utopia Stage",start:"12:45",end:"13:30"},
+    {name:"Max Grimm",stage:"Orbit Stage",start:"13:20",end:"14:00"},
+    {name:"The Pretty Reckless",stage:"Utopia Stage",start:"14:00",end:"15:00"},
+    {name:"Paleface Swiss",stage:"Mandora Stage",start:"14:15",end:"14:50"},
+    {name:"letlive.",stage:"Orbit Stage",start:"14:25",end:"15:05"},
+    {name:"Bilmuri",stage:"Mandora Stage",start:"15:10",end:"15:55"},
+    {name:"Tom Morello",stage:"Utopia Stage",start:"15:30",end:"16:30"},
+    {name:"Anna Grey",stage:"Orbit Stage",start:"15:30",end:"16:10"},
+    {name:"Bury Tomorrow",stage:"Mandora Stage",start:"16:20",end:"17:15"},
+    {name:"The Subways",stage:"Orbit Stage",start:"16:35",end:"17:15"},
+    {name:"Three Days Grace",stage:"Utopia Stage",start:"17:00",end:"18:15"},
+    {name:"Wargasm",stage:"Orbit Stage",start:"17:40",end:"18:20"},
+    {name:"Landmvrks",stage:"Mandora Stage",start:"17:45",end:"18:45"},
+    {name:"Dying Wish",stage:"Orbit Stage",start:"18:45",end:"19:30"},
+    {name:"Electric Callboy",stage:"Utopia Stage",start:"18:55",end:"20:25"},
+    {name:"Ice Nine Kills",stage:"Mandora Stage",start:"19:15",end:"20:25"},
+    {name:"High Vis",stage:"Orbit Stage",start:"19:55",end:"20:40"},
+    {name:"Marteria",stage:"Mandora Stage",start:"21:05",end:"22:20"},
+    {name:"Thornhill",stage:"Orbit Stage",start:"21:05",end:"21:55"},
+    {name:"Volbeat",stage:"Utopia Stage",start:"21:10",end:"22:55"},
+    {name:"Basement",stage:"Orbit Stage",start:"22:20",end:"23:05"},
+    {name:"Bad Omens",stage:"Mandora Stage",start:"23:30",end:"25:00"},
+    {name:"Palaye Royale",stage:"Orbit Stage",start:"23:30",end:"24:30"},
+    {name:"H-Blockx",stage:"Orbit Stage",start:"25:00",end:"26:00"}
+  ],
+  "Sa, 06.06.":[
+    {name:"Bad Nerves",stage:"Utopia Stage",start:"12:35",end:"13:20"},
+    {name:"Mouth Culture",stage:"Orbit Stage",start:"12:50",end:"13:30"},
+    {name:"Return To Dust",stage:"Mandora Stage",start:"13:35",end:"14:05"},
+    {name:"Black Veil Brides",stage:"Utopia Stage",start:"13:50",end:"14:45"},
+    {name:"Ego Kill Talent",stage:"Orbit Stage",start:"13:55",end:"14:35"},
+    {name:"Blood Incantation",stage:"Mandora Stage",start:"14:25",end:"15:10"},
+    {name:"Boundaries",stage:"Orbit Stage",start:"15:00",end:"15:40"},
+    {name:"Hollywood Undead",stage:"Utopia Stage",start:"15:15",end:"16:15"},
+    {name:"Bloodywood",stage:"Mandora Stage",start:"15:35",end:"16:20"},
+    {name:"Gatecreeper",stage:"Orbit Stage",start:"16:05",end:"16:45"},
+    {name:"Finch",stage:"Utopia Stage",start:"16:45",end:"17:55"},
+    {name:"Breaking Benjamin",stage:"Mandora Stage",start:"16:45",end:"17:40"},
+    {name:"Catch Your Breath",stage:"Orbit Stage",start:"17:10",end:"17:50"},
+    {name:"Social Distortion",stage:"Mandora Stage",start:"18:10",end:"19:10"},
+    {name:"TesseracT",stage:"Orbit Stage",start:"18:15",end:"19:00"},
+    {name:"The Offspring",stage:"Utopia Stage",start:"18:40",end:"19:55"},
+    {name:"President",stage:"Orbit Stage",start:"19:25",end:"20:15"},
+    {name:"Alter Bridge",stage:"Mandora Stage",start:"19:40",end:"20:40"},
+    {name:"Iron Maiden",stage:"Utopia Stage",start:"20:40",end:"23:00"},
+    {name:"The Story So Far",stage:"Orbit Stage",start:"20:40",end:"21:25"},
+    {name:"A Perfect Circle",stage:"Mandora Stage",start:"21:20",end:"22:35"},
+    {name:"Set It Off",stage:"Orbit Stage",start:"21:50",end:"22:50"},
+    {name:"Sabaton",stage:"Mandora Stage",start:"23:20",end:"25:00"},
+    {name:"Kublai Khan TX",stage:"Orbit Stage",start:"23:20",end:"24:20"},
+    {name:"Sondaschule",stage:"Orbit Stage",start:"24:50",end:"26:00"}
+  ],
+  "So, 07.06.":[
+    {name:"Loathe",stage:"Mandora Stage",start:"12:50",end:"13:35"},
+    {name:"Mehnersmoos",stage:"Utopia Stage",start:"13:25",end:"14:20"},
+    {name:"Slay Squad",stage:"Orbit Stage",start:"13:55",end:"14:35"},
+    {name:"We Came As Romans",stage:"Mandora Stage",start:"14:05",end:"14:50"},
+    {name:"Bush",stage:"Utopia Stage",start:"14:50",end:"15:50"},
+    {name:"Ankor",stage:"Orbit Stage",start:"15:00",end:"15:40"},
+    {name:"Mastodon",stage:"Mandora Stage",start:"15:20",end:"16:10"},
+    {name:"Magnolia Park",stage:"Orbit Stage",start:"16:05",end:"16:45"},
+    {name:"The Hives",stage:"Utopia Stage",start:"16:20",end:"17:20"},
+    {name:"The Plot In You",stage:"Mandora Stage",start:"16:40",end:"17:40"},
+    {name:"TX2",stage:"Orbit Stage",start:"17:10",end:"17:50"},
+    {name:"Architects",stage:"Utopia Stage",start:"17:50",end:"18:50"},
+    {name:"Within Temptation",stage:"Mandora Stage",start:"18:10",end:"19:10"},
+    {name:"Don Broco",stage:"Orbit Stage",start:"18:15",end:"19:00"},
+    {name:"Drain",stage:"Orbit Stage",start:"19:25",end:"20:10"},
+    {name:"Papa Roach",stage:"Utopia Stage",start:"19:30",end:"20:45"},
+    {name:"Trivium",stage:"Mandora Stage",start:"19:40",end:"20:50"},
+    {name:"Malevolence",stage:"Orbit Stage",start:"20:35",end:"21:25"},
+    {name:"Linkin Park",stage:"Utopia Stage",start:"21:30",end:"23:00"},
+    {name:"Babymetal",stage:"Mandora Stage",start:"21:30",end:"22:45"},
+    {name:"The Funeral Portrait",stage:"Orbit Stage",start:"21:50",end:"22:50"},
+    {name:"Danko Jones",stage:"Orbit Stage",start:"23:20",end:"24:20"},
+    {name:"Limp Bizkit",stage:"Mandora Stage",start:"23:45",end:"25:00"},
+    {name:"The Butcher Sisters",stage:"Orbit Stage",start:"24:50",end:"26:00"}
+  ]
+};
+
+const stageColors = {
+  "Utopia Stage":  "#185FA5",
+  "Mandora Stage": "#3B6D11",
+  "Orbit Stage":   "#854F0B"
+};
+
+const days = Object.keys(RAW);
+let currentDay = days[0];
+let currentStage = "Alle";
+const orders = {};
+days.forEach(d => { orders[d] = [...RAW[d]]; });
+
+function toMin(t) {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function computeConflicts(list) {
+  const MARGIN = 5;
+  return list.map((band, i) => {
+    const bs = toMin(band.start), be = toMin(band.end);
+    const fullConflicts = [], partialConflicts = [];
+    list.forEach((other, j) => {
+      if (i === j || other.stage === band.stage) return;
+      const os = toMin(other.start), oe = toMin(other.end);
+      const effectStart = bs - MARGIN, effectEnd = be + MARGIN;
+      const effectOverlap = Math.min(effectEnd, oe) - Math.max(effectStart, os);
+      if (effectOverlap <= 0) return;
+      const actualOverlap = Math.min(be, oe) - Math.max(bs, os);
+      const isTravel = actualOverlap <= 0;
+      if (j < i) {
+        fullConflicts.push({ name: other.name, travel: isTravel });
+      } else {
+        partialConflicts.push({ name: other.name, travel: isTravel });
+      }
+    });
+    return { ...band, fullConflicts, partialConflicts };
+  });
+}
+
+let dragSrcIdx = null;
+
+function render() {
+  const fullList = orders[currentDay];
+  const filtered = currentStage === "Alle"
+    ? fullList
+    : fullList.filter(b => b.stage === currentStage);
+
+  const withConflicts = computeConflicts(filtered);
+  const container = document.getElementById("bandList");
+  container.innerHTML = "";
+
+  if (withConflicts.length === 0) {
+    container.innerHTML = '<div class="empty">Keine Bands für diese Auswahl.</div>';
+    return;
+  }
+
+  withConflicts.forEach((band, i) => {
+    const hasConflict = band.fullConflicts.length > 0;
+    const hasPartial  = band.partialConflicts.length > 0;
+
+    const card = document.createElement("div");
+    card.className = "band-card" + (hasConflict ? " state-conflict" : hasPartial ? " state-partial" : "");
+    card.draggable = true;
+    card.dataset.idx = i;
+
+    let badgeClass = "ok", badgeText = "✓ OK";
+    if (hasConflict) { badgeClass = "conflict"; badgeText = "⚠ Konflikt"; }
+    else if (hasPartial) { badgeClass = "partial"; badgeText = "◑ Zeitnah"; }
+
+    let conflictHtml = "";
+    if (hasConflict) {
+      const names = band.fullConflicts.map(x => x.name + (x.travel ? " (+Weg)" : "")).join(", ");
+      conflictHtml = `<div class="conflict-note red">Überschneidung mit: ${names}</div>`;
+    } else if (hasPartial) {
+      const names = band.partialConflicts.map(x => x.name).join(", ");
+      conflictHtml = `<div class="conflict-note amber">Zeitnah: ${names}</div>`;
+    }
+
+    const stageColor = stageColors[band.stage] || "#888";
+
+    card.innerHTML = `
+      <div class="drag-handle" aria-hidden="true"><i class="ti ti-grip-vertical"></i></div>
+      <div class="rank-num">#${i + 1}</div>
+      <div class="band-info">
+        <div class="band-name">${band.name}</div>
+        <div class="band-meta">
+          <span style="color:${stageColor};font-weight:500">${band.stage}</span>
+          &nbsp;·&nbsp;${band.start}–${band.end}
+        </div>
+        ${conflictHtml}
+      </div>
+      <div class="badge ${badgeClass}">${badgeText}</div>
+    `;
+
+    card.addEventListener("dragstart", e => {
+      dragSrcIdx = i;
+      card.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    card.addEventListener("dragend", () => card.classList.remove("dragging"));
+    card.addEventListener("dragover", e => { e.preventDefault(); card.classList.add("drag-over"); });
+    card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+    card.addEventListener("drop", e => {
+      e.preventDefault();
+      card.classList.remove("drag-over");
+      if (dragSrcIdx === null || dragSrcIdx === i) return;
+
+      const srcBand = filtered[dragSrcIdx];
+      const tgtBand = filtered[i];
+      const full = orders[currentDay];
+      const fi = full.indexOf(srcBand);
+      const ti = full.indexOf(tgtBand);
+      full.splice(fi, 1);
+      const newTi = full.indexOf(tgtBand);
+      full.splice(newTi, 0, srcBand);
+      dragSrcIdx = null;
+      render();
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function buildTabs() {
+  const c = document.getElementById("dayTabs");
+  days.forEach(d => {
+    const b = document.createElement("button");
+    b.className = "tab" + (d === currentDay ? " active" : "");
+    b.textContent = d;
+    b.addEventListener("click", () => {
+      currentDay = d;
+      document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      render();
+    });
+    c.appendChild(b);
+  });
+}
+
+function buildStageFilter() {
+  const c = document.getElementById("stageFilter");
+  ["Alle", "Utopia Stage", "Mandora Stage", "Orbit Stage"].forEach(s => {
+    const b = document.createElement("button");
+    b.className = "sf" + (s === currentStage ? " active" : "");
+    b.textContent = s;
+    b.addEventListener("click", () => {
+      currentStage = s;
+      document.querySelectorAll(".sf").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      render();
+    });
+    c.appendChild(b);
+  });
+}
+
+buildTabs();
+buildStageFilter();
+render();
+</script>
+</body>
+</html>
