@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rock im Park 2026 — Planer</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,6 +29,13 @@
       --border: rgba(255,255,255,0.12);
       --border2: rgba(255,255,255,0.25);
     }
+    .band-card.c-red   { background: #2a1010 !important; }
+    .band-card.c-amber { background: #251a08 !important; }
+    .conflict-note.red   { color: #F09595 !important; }
+    .conflict-note.amber { color: #FAC775 !important; }
+    .badge.ok      { background: #173404; color: #C0DD97; }
+    .badge.partial { background: #412402; color: #FAC775; }
+    .badge.conflict { background: #501313; color: #F7C1C1; }
   }
 
   body {
@@ -40,24 +46,10 @@
     padding: 1.5rem 1rem;
   }
 
-  .container {
-    max-width: 720px;
-    margin: 0 auto;
-  }
+  .container { max-width: 720px; margin: 0 auto; }
 
-  h1 {
-    font-size: 22px;
-    font-weight: 500;
-    margin-bottom: 1.5rem;
-  }
-
-  h1 span {
-    font-weight: 400;
-    color: var(--text2);
-    font-size: 16px;
-    display: block;
-    margin-top: 4px;
-  }
+  h1 { font-size: 22px; font-weight: 500; margin-bottom: 0.25rem; }
+  .subtitle { font-size: 13px; color: var(--text2); margin: 0.4rem 0 1rem; }
 
   .card {
     background: var(--bg);
@@ -67,202 +59,96 @@
     margin-bottom: 1rem;
   }
 
-  .day-tabs {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-  }
+  .day-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
 
   .tab {
     padding: 6px 14px;
     border: 0.5px solid var(--border2);
     border-radius: var(--radius-md);
-    cursor: pointer;
-    font-size: 13px;
-    background: var(--bg);
-    color: var(--text2);
-    transition: all .15s;
-    font-family: inherit;
+    cursor: pointer; font-size: 13px;
+    background: var(--bg); color: var(--text2);
+    transition: all .15s; font-family: inherit;
   }
-
   .tab:hover { background: var(--bg2); color: var(--text); }
   .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-  .stage-filter {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-  }
+  .stage-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
 
   .sf {
     padding: 4px 10px;
     border: 0.5px solid var(--border2);
     border-radius: var(--radius-md);
-    cursor: pointer;
-    font-size: 12px;
-    background: var(--bg);
-    color: var(--text2);
-    font-family: inherit;
-    transition: all .15s;
+    cursor: pointer; font-size: 12px;
+    background: var(--bg); color: var(--text2);
+    font-family: inherit; transition: all .15s;
   }
-
   .sf:hover { background: var(--bg2); color: var(--text); }
   .sf.active { background: var(--bg3); color: var(--text); border-color: var(--border2); }
 
-  .legend {
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-  }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .leg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
-  .leg {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--text2);
-  }
+  .info-bar { font-size: 12px; color: var(--text2); margin-bottom: 0.75rem; }
 
-  .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .info {
-    font-size: 12px;
-    color: var(--text2);
-    margin-bottom: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .band-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
+  .band-list { display: flex; flex-direction: column; gap: 6px; }
 
   .band-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
+    display: flex; align-items: flex-start; gap: 10px;
     padding: 10px 12px;
     border: 0.5px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--bg);
-    cursor: grab;
-    user-select: none;
+    cursor: grab; user-select: none;
     transition: border-color .15s, background .15s, transform .1s;
   }
-
   .band-card:hover { background: var(--bg2); }
   .band-card:active { cursor: grabbing; }
   .band-card.dragging { opacity: 0.45; transform: scale(0.98); }
   .band-card.drag-over { border-color: var(--border2); background: var(--bg3); }
+  .band-card.c-red   { border-color: #E24B4A !important; background: #FCEBEB; }
+  .band-card.c-amber { border-color: #EF9F27 !important; background: #FAEEDA; }
 
-  .band-card.state-conflict { border-color: #E24B4A !important; }
-  .band-card.state-partial  { border-color: #EF9F27 !important; }
-
-  .drag-handle {
-    color: var(--text2);
-    font-size: 18px;
-    padding-top: 1px;
-    flex-shrink: 0;
-  }
-
+  .drag-handle { color: var(--text2); font-size: 18px; flex-shrink: 0; padding-top: 1px; }
   .rank-num {
-    font-size: 13px;
-    color: var(--text2);
-    min-width: 28px;
-    text-align: right;
+    font-size: 13px; color: var(--text2);
+    min-width: 28px; text-align: right;
     font-variant-numeric: tabular-nums;
-    padding-top: 2px;
-    flex-shrink: 0;
+    padding-top: 2px; flex-shrink: 0;
   }
-
-  .band-info {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .band-name {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-  }
-
-  .band-meta {
-    font-size: 12px;
-    color: var(--text2);
-    margin-top: 2px;
-  }
-
-  .conflict-note {
-    font-size: 11px;
-    margin-top: 4px;
-  }
-
-  .conflict-note.red  { color: #A32D2D; }
+  .band-info { flex: 1; min-width: 0; }
+  .band-name { font-size: 14px; font-weight: 500; line-height: 1.4; }
+  .band-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .conflict-note { font-size: 11px; margin-top: 4px; }
+  .conflict-note.red   { color: #A32D2D; }
   .conflict-note.amber { color: #854F0B; }
-
-  @media (prefers-color-scheme: dark) {
-    .conflict-note.red  { color: #F09595; }
-    .conflict-note.amber { color: #FAC775; }
-  }
+  .conflict-note.gray  { color: var(--text2); }
 
   .badge {
-    font-size: 11px;
-    padding: 2px 8px;
+    font-size: 11px; padding: 2px 8px;
     border-radius: var(--radius-md);
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 1px;
+    white-space: nowrap; flex-shrink: 0; margin-top: 1px;
   }
-
   .badge.ok      { background: #EAF3DE; color: #3B6D11; }
   .badge.partial { background: #FAEEDA; color: #854F0B; }
   .badge.conflict { background: #FCEBEB; color: #A32D2D; }
 
-  @media (prefers-color-scheme: dark) {
-    .badge.ok       { background: #173404; color: #C0DD97; }
-    .badge.partial  { background: #412402; color: #FAC775; }
-    .badge.conflict { background: #501313; color: #F7C1C1; }
-  }
-
-  .empty {
-    text-align: center;
-    color: var(--text2);
-    font-size: 14px;
-    padding: 2rem 0;
-  }
-
-  footer {
-    text-align: center;
-    font-size: 12px;
-    color: var(--text2);
-    margin-top: 2rem;
-  }
+  footer { text-align: center; font-size: 12px; color: var(--text2); margin-top: 1.5rem; }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Rock im Park 2026 — Planer<span>Nürnberg, 05.–07. Juni 2026</span></h1>
+  <h1>Rock im Park 2026 — Planer</h1>
+  <p class="subtitle">Nürnberg, 05.–07. Juni 2026 · Sortiere Bands nach Priorität per Drag &amp; Drop</p>
 
   <div class="card">
     <div class="day-tabs" id="dayTabs"></div>
     <div class="stage-filter" id="stageFilter"></div>
     <div class="legend">
-      <div class="leg"><div class="dot" style="background:#E24B4A"></div>Vollständige Überschneidung (±5 Min)</div>
-      <div class="leg"><div class="dot" style="background:#EF9F27"></div>Teilweise Überschneidung</div>
-      <div class="leg"><div class="dot" style="background:#639922"></div>Kein Konflikt</div>
+      <div class="leg"><div class="dot" style="background:#E24B4A"></div>Verpasst — läuft komplett während einer wichtigeren Band</div>
+      <div class="leg"><div class="dot" style="background:#EF9F27"></div>Teilweise — Überschneidung mit wichtigerer Band (±5 Min Weg)</div>
     </div>
-    <div class="info"><i class="ti ti-arrows-up-down" style="font-size:14px"></i> Reihenfolge per Drag &amp; Drop ändern — höher = wichtiger</div>
+    <div class="info-bar">↕ Reihenfolge ändern — Platz 1 = höchste Priorität. Konflikte beziehen sich immer auf höher gerankte Bands.</div>
     <div class="band-list" id="bandList"></div>
   </div>
 
@@ -359,8 +245,7 @@ const stageColors = {
 };
 
 const days = Object.keys(RAW);
-let currentDay = days[0];
-let currentStage = "Alle";
+let currentDay = days[0], currentStage = "Alle", dragSrc = null;
 const orders = {};
 days.forEach(d => { orders[d] = [...RAW[d]]; });
 
@@ -370,106 +255,100 @@ function toMin(t) {
 }
 
 function computeConflicts(list) {
-  const MARGIN = 5;
+  const M = 5;
   return list.map((band, i) => {
     const bs = toMin(band.start), be = toMin(band.end);
-    const fullConflicts = [], partialConflicts = [];
-    list.forEach((other, j) => {
-      if (i === j || other.stage === band.stage) return;
-      const os = toMin(other.start), oe = toMin(other.end);
-      const effectStart = bs - MARGIN, effectEnd = be + MARGIN;
-      const effectOverlap = Math.min(effectEnd, oe) - Math.max(effectStart, os);
-      if (effectOverlap <= 0) return;
-      const actualOverlap = Math.min(be, oe) - Math.max(bs, os);
-      const isTravel = actualOverlap <= 0;
-      if (j < i) {
-        fullConflicts.push({ name: other.name, travel: isTravel });
+    const fullyBlocked = [], partlyBlocked = [], lowerOverlaps = [];
+
+    // Check only higher-ranked bands (index < i)
+    for (let j = 0; j < i; j++) {
+      const o = list[j];
+      if (o.stage === band.stage) continue;
+      const os = toMin(o.start), oe = toMin(o.end);
+      const eff_s = os - M, eff_e = oe + M;
+      const effectOverlap = Math.min(eff_e, be) - Math.max(eff_s, bs);
+      if (effectOverlap <= 0) continue;
+      const actualOverlap = Math.min(oe, be) - Math.max(os, bs);
+      if (actualOverlap > 0) {
+        const fullyContained = (bs >= eff_s && be <= eff_e);
+        if (fullyContained) fullyBlocked.push(o.name);
+        else partlyBlocked.push(o.name);
       } else {
-        partialConflicts.push({ name: other.name, travel: isTravel });
+        partlyBlocked.push(o.name + " (Weg)");
       }
-    });
-    return { ...band, fullConflicts, partialConflicts };
+    }
+
+    // Info: lower-ranked overlaps
+    for (let j = i + 1; j < list.length; j++) {
+      const o = list[j];
+      if (o.stage === band.stage) continue;
+      const os = toMin(o.start), oe = toMin(o.end);
+      const ov = Math.min(be + M, oe) - Math.max(bs - M, os);
+      if (ov > 0) lowerOverlaps.push(o.name);
+    }
+
+    return { ...band, fullyBlocked, partlyBlocked, lowerOverlaps };
   });
 }
 
-let dragSrcIdx = null;
-
 function render() {
-  const fullList = orders[currentDay];
-  const filtered = currentStage === "Alle"
-    ? fullList
-    : fullList.filter(b => b.stage === currentStage);
-
-  const withConflicts = computeConflicts(filtered);
+  const full = orders[currentDay];
+  const list = currentStage === "Alle" ? full : full.filter(b => b.stage === currentStage);
+  const wc = computeConflicts(list);
   const container = document.getElementById("bandList");
   container.innerHTML = "";
 
-  if (withConflicts.length === 0) {
-    container.innerHTML = '<div class="empty">Keine Bands für diese Auswahl.</div>';
-    return;
-  }
-
-  withConflicts.forEach((band, i) => {
-    const hasConflict = band.fullConflicts.length > 0;
-    const hasPartial  = band.partialConflicts.length > 0;
+  wc.forEach((band, i) => {
+    const isFullBlocked = band.fullyBlocked.length > 0;
+    const isPartBlocked = band.partlyBlocked.length > 0 && !isFullBlocked;
 
     const card = document.createElement("div");
-    card.className = "band-card" + (hasConflict ? " state-conflict" : hasPartial ? " state-partial" : "");
+    card.className = "band-card" + (isFullBlocked ? " c-red" : isPartBlocked ? " c-amber" : "");
     card.draggable = true;
-    card.dataset.idx = i;
 
-    let badgeClass = "ok", badgeText = "✓ OK";
-    if (hasConflict) { badgeClass = "conflict"; badgeText = "⚠ Konflikt"; }
-    else if (hasPartial) { badgeClass = "partial"; badgeText = "◑ Zeitnah"; }
+    let badgeClass = "ok", badgeText = "✓ frei";
+    if (isFullBlocked)  { badgeClass = "conflict"; badgeText = "✗ verpasst"; }
+    else if (isPartBlocked) { badgeClass = "partial"; badgeText = "◑ teilweise"; }
 
-    let conflictHtml = "";
-    if (hasConflict) {
-      const names = band.fullConflicts.map(x => x.name + (x.travel ? " (+Weg)" : "")).join(", ");
-      conflictHtml = `<div class="conflict-note red">Überschneidung mit: ${names}</div>`;
-    } else if (hasPartial) {
-      const names = band.partialConflicts.map(x => x.name).join(", ");
-      conflictHtml = `<div class="conflict-note amber">Zeitnah: ${names}</div>`;
+    let noteHtml = "";
+    if (isFullBlocked) {
+      noteHtml = `<div class="conflict-note red">Verpasst wegen: ${band.fullyBlocked.join(", ")}</div>`;
+      if (band.partlyBlocked.length > 0)
+        noteHtml += `<div class="conflict-note amber">Auch zeitnah: ${band.partlyBlocked.join(", ")}</div>`;
+    } else if (isPartBlocked) {
+      noteHtml = `<div class="conflict-note amber">Teilw. überschnitten mit: ${band.partlyBlocked.join(", ")}</div>`;
+    }
+    if (band.lowerOverlaps.length > 0) {
+      noteHtml += `<div class="conflict-note gray">Gleichzeitig (niedriger gerankt): ${band.lowerOverlaps.join(", ")}</div>`;
     }
 
-    const stageColor = stageColors[band.stage] || "#888";
-
+    const sc = stageColors[band.stage] || "#888";
     card.innerHTML = `
-      <div class="drag-handle" aria-hidden="true"><i class="ti ti-grip-vertical"></i></div>
+      <div class="drag-handle" aria-hidden="true">&#8661;</div>
       <div class="rank-num">#${i + 1}</div>
       <div class="band-info">
         <div class="band-name">${band.name}</div>
-        <div class="band-meta">
-          <span style="color:${stageColor};font-weight:500">${band.stage}</span>
-          &nbsp;·&nbsp;${band.start}–${band.end}
-        </div>
-        ${conflictHtml}
+        <div class="band-meta"><span style="color:${sc};font-weight:500">${band.stage}</span> &nbsp;·&nbsp; ${band.start}–${band.end}</div>
+        ${noteHtml}
       </div>
       <div class="badge ${badgeClass}">${badgeText}</div>
     `;
 
     card.addEventListener("dragstart", e => {
-      dragSrcIdx = i;
-      card.classList.add("dragging");
+      dragSrc = i; card.classList.add("dragging");
       e.dataTransfer.effectAllowed = "move";
     });
     card.addEventListener("dragend", () => card.classList.remove("dragging"));
     card.addEventListener("dragover", e => { e.preventDefault(); card.classList.add("drag-over"); });
     card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
     card.addEventListener("drop", e => {
-      e.preventDefault();
-      card.classList.remove("drag-over");
-      if (dragSrcIdx === null || dragSrcIdx === i) return;
-
-      const srcBand = filtered[dragSrcIdx];
-      const tgtBand = filtered[i];
-      const full = orders[currentDay];
-      const fi = full.indexOf(srcBand);
-      const ti = full.indexOf(tgtBand);
-      full.splice(fi, 1);
-      const newTi = full.indexOf(tgtBand);
-      full.splice(newTi, 0, srcBand);
-      dragSrcIdx = null;
-      render();
+      e.preventDefault(); card.classList.remove("drag-over");
+      if (dragSrc === null || dragSrc === i) return;
+      const src = list[dragSrc], tgt = list[i];
+      const fo = orders[currentDay];
+      fo.splice(fo.indexOf(src), 1);
+      fo.splice(fo.indexOf(tgt), 0, src);
+      dragSrc = null; render();
     });
 
     container.appendChild(card);
@@ -485,14 +364,13 @@ function buildTabs() {
     b.addEventListener("click", () => {
       currentDay = d;
       document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
-      b.classList.add("active");
-      render();
+      b.classList.add("active"); render();
     });
     c.appendChild(b);
   });
 }
 
-function buildStageFilter() {
+function buildSF() {
   const c = document.getElementById("stageFilter");
   ["Alle", "Utopia Stage", "Mandora Stage", "Orbit Stage"].forEach(s => {
     const b = document.createElement("button");
@@ -501,15 +379,14 @@ function buildStageFilter() {
     b.addEventListener("click", () => {
       currentStage = s;
       document.querySelectorAll(".sf").forEach(x => x.classList.remove("active"));
-      b.classList.add("active");
-      render();
+      b.classList.add("active"); render();
     });
     c.appendChild(b);
   });
 }
 
 buildTabs();
-buildStageFilter();
+buildSF();
 render();
 </script>
 </body>
